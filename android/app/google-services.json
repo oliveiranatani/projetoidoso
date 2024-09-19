@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "736799613969",
+    "project_id": "projetoidoso-ef1de",
+    "storage_bucket": "projetoidoso-ef1de.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:736799613969:android:7d09c4878af2f0585d7db0",
+        "android_client_info": {
+          "package_name": "br.com.senai.appidoso"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfIzdl4ZRY5R4qGS3vg1nPIUjjdsRS3sY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
