@@ -24,7 +24,7 @@ class _CadastroPageState extends State<CadastroPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF892CDB),
+        backgroundColor: const Color(0xFFBA68C8),
         title: const Text('Cadastro'),
       ),
       body: Padding(
@@ -116,7 +116,8 @@ class _CadastroPageState extends State<CadastroPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF892CDB),
               ),
-              child: const Text('Cadastrar'),
+              child: const Text('Cadastrar',
+               style: TextStyle(color: Colors.white),),
             ),
             const SizedBox(height: 20),
             Row(

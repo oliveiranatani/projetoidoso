@@ -1,17 +1,17 @@
-import 'package:appidoso/Pages/profissional/cadastro_profissional.dart';
-import 'package:appidoso/Pages/userprofile.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:appidoso/Pages/idoso/cadastro.dart';
+import 'package:appidoso/Pages/profissional/catalogo_profissionais.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Loginprofissional extends StatefulWidget {
-  const Loginprofissional({super.key});
+class LoginIdoso extends StatefulWidget {
+  const LoginIdoso({super.key});
 
   @override
-  State<Loginprofissional> createState() => _LoginprofissionalState();
+  _LoginIdosoState createState() => _LoginIdosoState();
 }
 
-class _LoginprofissionalState extends State<Loginprofissional> {
+class _LoginIdosoState extends State<LoginIdoso> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -24,9 +24,10 @@ class _LoginprofissionalState extends State<Loginprofissional> {
         email: emailController.text,
         password: passwordController.text,
       );
+      // Navegar para a tela CatalogoProfissionais após o login bem-sucedido
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => UserProfileScreen(userCredential.user!),
+          builder: (context) => const CatalogoProfissionais(),
         ),
       );
     } catch (e) {
@@ -41,8 +42,8 @@ class _LoginprofissionalState extends State<Loginprofissional> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF892CDB),
-        title: const Text('Login'),
+        backgroundColor: const Color(0xFFBA68C8),
+        title: const Text('Login Idoso'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -80,7 +81,10 @@ class _LoginprofissionalState extends State<Loginprofissional> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF892CDB),
               ),
-              child: const Text('Entrar'),
+              child: const Text(
+                'Entrar',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
             const SizedBox(height: 20),
             Row(
@@ -91,7 +95,7 @@ class _LoginprofissionalState extends State<Loginprofissional> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => CadastroProfissional()),
+                      MaterialPageRoute(builder: (context) => const CadastroPage()),
                     );
                   },
                   child: const Text('Cadastre-se'),

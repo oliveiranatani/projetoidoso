@@ -1,57 +1,109 @@
 import 'package:appidoso/Pages/idoso/cadastro.dart';
-import 'package:appidoso/Pages/idoso/loginidoso.dart';
+import 'package:appidoso/Pages/profissional/catalogo_profissionais.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'profissional/cadastro_profissional.dart';
+class LoginIdoso extends StatefulWidget {
+  const LoginIdoso({super.key});
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  @override
+  _LoginIdosoState createState() => _LoginIdosoState();
+}
+
+class _LoginIdosoState extends State<LoginIdoso> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  Future<void> _login() async {
+    try {
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+      // Navegar para a tela CatalogoProfissionais após o login bem-sucedido
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const CatalogoProfissionais(),
+        ),
+      );
+    } catch (e) {
+      print("Erro no login: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao fazer login')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Align(
-            alignment: Alignment.topRight,
-            child: TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => CadastroProfissional()),
-                );
-              },
-              child: const Text(
-                'Sou Profissional',
-                style: TextStyle(color: Colors.black),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFBA68C8),
+        title: const Text('Login Idoso'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: emailController,
+              decoration: InputDecoration(
+                labelText: 'E-mail',
+                filled: true,
+                fillColor: const Color(0xFFE1BEE7),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: BorderSide.none,
+                ),
               ),
             ),
-          ),
-          const Spacer(), // Adicionado para dar espaço entre o topo e os botões
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) =>  const LoginPage()),
-              );
-            },
-            child: const Text('Login'),
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CadastroPage()),
-              );
-            },
-            child: const Text('Cadastre-se'),
-          ),
-          const Spacer(flex: 2), // Adicionado para criar espaço no final
-        ],
+            const SizedBox(height: 16),
+            TextField(
+              controller: passwordController,
+              decoration: InputDecoration(
+                labelText: 'Senha',
+                filled: true,
+                fillColor: const Color(0xFFE1BEE7),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              obscureText: true,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _login,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF892CDB),
+              ),
+              child: const Text(
+                'Entrar',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('Não tem uma conta? '),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const CadastroPage()),
+                    );
+                  },
+                  child: const Text('Cadastre-se'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

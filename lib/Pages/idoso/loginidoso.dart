@@ -1,6 +1,6 @@
 import 'package:appidoso/Pages/idoso/cadastro.dart';
+import 'package:appidoso/Pages/profissional/catalogo_profissionais.dart'; 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:appidoso/Pages/userprofile.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -24,9 +24,10 @@ class _LoginPageState extends State<LoginPage> {
         email: emailController.text,
         password: passwordController.text,
       );
+      // Navegar para a tela CatalogoProfissionais após o login bem-sucedido
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => UserProfileScreen(userCredential.user!),
+          builder: (context) => CatalogoProfissionais(), // Atualize aqui
         ),
       );
     } catch (e) {
@@ -41,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF892CDB),
+        backgroundColor: const Color(0xFFBA68C8),
         title: const Text('Login'),
       ),
       body: Padding(
@@ -80,7 +81,10 @@ class _LoginPageState extends State<LoginPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF892CDB),
               ),
-              child: const Text('Entrar'),
+              child: const Text(
+                'Entrar',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
             const SizedBox(height: 20),
             Row(

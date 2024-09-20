@@ -43,13 +43,15 @@ class CatalogoProfissionais extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    "Bem viver!",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFFBA68C8),
+                  padding: EdgeInsets.all(20.0),
+                  child: Center(
+                    child: Text(
+                      "Bem viver!",
+                      style: TextStyle(
+                        fontSize: 27,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFBA68C8),
+                      ),
                     ),
                   ),
                 ),
