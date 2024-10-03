@@ -1,5 +1,7 @@
+import 'package:appidoso/Pages/idoso/login_idoso.dart';
+import 'package:appidoso/Servicos/cadastrar_idoso.dart';
 import 'package:flutter/material.dart';
-import 'package:appidoso/Pages/idoso/loginidoso.dart'; // Certifique-se de que o caminho está correto
+import 'package:appidoso/comum/meuSnackbar.dart'; // Importando a função
 
 class CadastroPage extends StatefulWidget {
   const CadastroPage({super.key});
@@ -16,8 +18,31 @@ class _CadastroPageState extends State<CadastroPage> {
   final TextEditingController cpfController = TextEditingController();
   final TextEditingController birthdateController = TextEditingController();
 
-  void _register() {
-    // Lógica de cadastro aqui
+  void _register() async {
+    final cadastrar = AutenticacaoServico();
+    try {
+      await cadastrar.cadastrarUsuario(
+        nome: nameController.text, 
+        email: emailController.text, 
+        senha: passwordController.text, 
+        confSenha: confirmPasswordController.text, 
+        cpf: cpfController.text, 
+        dtNas: birthdateController.text
+      );
+
+      // Exibir mensagem de sucesso
+      mostrarSnackbar(
+        context: context, 
+        texto: 'Usuário cadastrado com sucesso!', 
+        isErro: false
+      );
+    } catch (e) {
+      // Exibir mensagem de erro
+      mostrarSnackbar(
+        context: context, 
+        texto: 'Falha ao cadastrar usuário. Tente novamente.'
+      );
+    }
   }
 
   @override
@@ -128,7 +153,7 @@ class _CadastroPageState extends State<CadastroPage> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const LoginPage()),
+                      MaterialPageRoute(builder: (context) => const LoginIdoso()),
                     );
                   },
                   child: const Text('Faça login'),

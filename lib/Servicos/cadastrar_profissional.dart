@@ -5,7 +5,7 @@ class AutenticacaoServicoProfissional {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<void> cadastrar_profissional({
+  Future<void> cadastrar_Profissional({
     required String nome, 
     required String email, // CPF como string
     required String profissao, 

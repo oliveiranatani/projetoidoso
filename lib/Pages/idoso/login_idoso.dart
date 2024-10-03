@@ -1,17 +1,18 @@
-import 'package:appidoso/Pages/idoso/catalogo_idoso.dart';
-import 'package:appidoso/Pages/profissional/cadastro_profissional.dart';
+import 'package:appidoso/Pages/idoso/cadastro.dart';
+import 'package:appidoso/Pages/profissional/catalogo_profissionais.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:appidoso/comum/meuSnackbar.dart'; // Importando a função
 
-class LoginProfissional extends StatefulWidget {
-  const LoginProfissional({super.key});
+class LoginIdoso extends StatefulWidget {
+  const LoginIdoso({super.key});
 
   @override
-  _LoginProfissionalState createState() => _LoginProfissionalState();
+  _LoginIdosoState createState() => _LoginIdosoState();
 }
 
-class _LoginProfissionalState extends State<LoginProfissional> {
+class _LoginIdosoState extends State<LoginIdoso> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -24,15 +25,24 @@ class _LoginProfissionalState extends State<LoginProfissional> {
         email: emailController.text,
         password: passwordController.text,
       );
+      // Exibir mensagem de sucesso
+      mostrarSnackbar(
+        context: context,
+        texto: 'Login realizado com sucesso!',
+        isErro: false,
+      );
       // Navegar para a tela CatalogoProfissionais após o login bem-sucedido
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => const CatalogoIdosos(),
+          builder: (context) => const CatalogoProfissionais(),
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro no login: $e')),
+      print("Erro no login: $e");
+      // Exibir mensagem de erro
+      mostrarSnackbar(
+        context: context,
+        texto: 'Erro ao fazer login. Tente novamente.',
       );
     }
   }
@@ -42,14 +52,13 @@ class _LoginProfissionalState extends State<LoginProfissional> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFFBA68C8),
-        title: const Text('Login Profissional'),
+        title: const Text('Login Idoso'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Campo de E-mail
-            TextFormField(
+            TextField(
               controller: emailController,
               decoration: InputDecoration(
                 labelText: 'E-mail',
@@ -60,11 +69,9 @@ class _LoginProfissionalState extends State<LoginProfissional> {
                   borderSide: BorderSide.none,
                 ),
               ),
-              keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 16),
-            // Campo de Senha
-            TextFormField(
+            TextField(
               controller: passwordController,
               decoration: InputDecoration(
                 labelText: 'Senha',
@@ -78,7 +85,6 @@ class _LoginProfissionalState extends State<LoginProfissional> {
               obscureText: true,
             ),
             const SizedBox(height: 20),
-            // Botão de Entrar
             ElevatedButton(
               onPressed: _login,
               style: ElevatedButton.styleFrom(
@@ -90,7 +96,6 @@ class _LoginProfissionalState extends State<LoginProfissional> {
               ),
             ),
             const SizedBox(height: 20),
-            // Link para Cadastro
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -99,8 +104,7 @@ class _LoginProfissionalState extends State<LoginProfissional> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => const CadastroProfissional()),
+                      MaterialPageRoute(builder: (context) => const CadastroPage()),
                     );
                   },
                   child: const Text('Cadastre-se'),

@@ -1,22 +1,56 @@
+import 'package:appidoso/Pages/profissional/loginprofissional.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
+import 'package:appidoso/Servicos/cadastrar_profissional.dart';
+import 'package:appidoso/comum/meuSnackbar.dart'; // Importando a função
 
-class CatalogoProfissionais extends StatelessWidget {
-  const CatalogoProfissionais({super.key});
+class CadastroProfissional extends StatefulWidget {
+  const CadastroProfissional({super.key});
 
-  Future<List<Map<String, dynamic>>> fetchProfissionais() async {
+  @override
+  _CadastroProfissionalState createState() => _CadastroProfissionalState();
+}
+
+class _CadastroProfissionalState extends State<CadastroProfissional> {
+  final TextEditingController nomeController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController profissaoController = TextEditingController();
+  final TextEditingController conselhoRegionalController = TextEditingController();
+  final TextEditingController especializacaoController = TextEditingController();
+  final TextEditingController senhaController = TextEditingController();
+  final TextEditingController confirmaSenhaController = TextEditingController();
+
+  void _cadastrar() async {
+    final cadastro = AutenticacaoServicoProfissional();
+
     try {
-      final QuerySnapshot result = await FirebaseFirestore.instance.collection('profissional').get();
-      print("Total de profissionais encontrados: ${result.docs.length}");
-
-      for (var doc in result.docs) {
-        print("Profissional: ${doc.id} => ${doc.data()}");
-      }
-
-      return result.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+      await cadastro.cadastrar_Profissional(
+        nome: nomeController.text,
+        email: emailController.text,
+        profissao: profissaoController.text,
+        concelho: conselhoRegionalController.text,
+        especializacao: especializacaoController.text,
+        senha: senhaController.text,
+        confirSenha: confirmaSenhaController.text,
+      );
+      // Exibir mensagem de sucesso
+      mostrarSnackbar(
+        context: context,
+        texto: 'Cadastro realizado com sucesso!',
+        isErro: false,
+      );
+      // Navegar para a tela de login ou outra tela, se necessário
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginProfissional()),
+      );
     } catch (e) {
-      print("Erro ao buscar profissionais: $e");
-      return [];
+      print("Erro ao cadastrar: $e");
+      // Exibir mensagem de erro
+      mostrarSnackbar(
+        context: context,
+        texto: 'Erro ao cadastrar. Tente novamente.',
+      );
     }
   }
 
@@ -24,86 +58,168 @@ class CatalogoProfissionais extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Catálogo de Profissionais'),
-        backgroundColor: const Color(0xFFBA68C8),
+        backgroundColor: const Color(0xFF892CDB),
+        title: const Row(
+          children: [
+            Image(
+              image: AssetImage('assets/img/logopreta.png'),
+              height: 40, // Ajuste o tamanho conforme necessário
+            ),
+          ],
+        ),
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: fetchProfissionais(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return const Center(child: Text('Erro ao carregar profissionais'));
-          } else if (snapshot.hasData && snapshot.data!.isEmpty) {
-            return const Center(child: Text('Nenhum profissional cadastrado.'));
-          } else {
-            final profissionais = snapshot.data!;
-        
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    "Bem viver!",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFFBA68C8),
-                    ),
-                  ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            // Campo Nome
+            TextField(
+              controller: nomeController,
+              decoration: InputDecoration(
+                labelText: 'Nome',
+                filled: true,
+                fillColor: const Color(0xFFE1BEE7),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: BorderSide.none,
                 ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: profissionais.length,
-                    itemBuilder: (context, index) {
-                      final profissional = profissionais[index];
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Card(
-                          elevation: 5,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  profissional['nome'] ?? 'Nome não disponível',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  profissional['profissao1'] ?? 'Profissão não disponível',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  profissional['email'] ?? 'Email não disponível',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Campo Email
+            TextField(
+              controller: emailController,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                filled: true,
+                fillColor: const Color(0xFFE1BEE7),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              keyboardType: TextInputType.emailAddress,
+            ),
+            const SizedBox(height: 16),
+
+            // Campo Profissão
+            TextField(
+              controller: profissaoController,
+              decoration: InputDecoration(
+                labelText: 'Profissão',
+                filled: true,
+                fillColor: const Color(0xFFE1BEE7),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Campo Conselho Regional
+            TextField(
+              controller: conselhoRegionalController,
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+              ],
+              decoration: InputDecoration(
+                labelText: 'Conselho Regional',
+                filled: true,
+                fillColor: const Color(0xFFE1BEE7),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Campo Especialização
+            TextField(
+              controller: especializacaoController,
+              decoration: InputDecoration(
+                labelText: 'Especialização',
+                filled: true,
+                fillColor: const Color(0xFFE1BEE7),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Campo Senha
+            TextField(
+              controller: senhaController,
+              decoration: InputDecoration(
+                labelText: 'Senha',
+                filled: true,
+                fillColor: const Color(0xFFE1BEE7),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              obscureText: true,
+            ),
+            const SizedBox(height: 16),
+
+            // Campo Confirmar Senha
+            TextField(
+              controller: confirmaSenhaController,
+              decoration: InputDecoration(
+                labelText: 'Confirmar Senha',
+                filled: true,
+                fillColor: const Color(0xFFE1BEE7),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              obscureText: true,
+            ),
+            const SizedBox(height: 20),
+
+            // Botão Cadastrar
+            ElevatedButton(
+              onPressed: _cadastrar,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF892CDB),
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
+              ),
+              child: const Text(
+                'Cadastrar-se',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Link para Login
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('Já é Profissional Cadastrado? '),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const LoginProfissional()),
+                    );
+                  },
+                  child: const Text('Logar'),
                 ),
               ],
-            );
-          }
-        },
+            ),
+          ],
+        ),
       ),
     );
   }

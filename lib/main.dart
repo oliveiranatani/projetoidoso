@@ -1,7 +1,6 @@
-import 'package:appidoso/Pages/homepage.dart';
+import 'package:appidoso/Pages/homePage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-
 
 
 void main() async {
@@ -20,7 +19,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.purple,
       ),
-      home: const HomePage(), // Wrapper para lidar com estado de autenticação
+      home: const Homepage(), // Wrapper para lidar com estado de autenticação
     );
   }
 }
