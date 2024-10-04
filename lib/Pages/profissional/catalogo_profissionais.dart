@@ -23,6 +23,19 @@ class CatalogoProfissionais extends StatelessWidget {
     }
   }
 
+  Future<String?> fetchNomeUsuario(String uid) async {
+    try {
+      final DocumentSnapshot userDoc =
+          await FirebaseFirestore.instance.collection('user').doc(uid).get();
+      if (userDoc.exists) {
+        return userDoc.get('nome');
+      }
+    } catch (e) {
+      print("Erro ao buscar nome do usuário: $e");
+    }
+    return null; // Retorna null se não encontrar ou ocorrer erro
+  }
+
   @override
   Widget build(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser; // Pega o usuário logado
@@ -45,44 +58,56 @@ class CatalogoProfissionais extends StatelessWidget {
           ),
         ],
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            UserAccountsDrawerHeader(
-              accountName: const Text('Nome do Usuário'), // Nome do usuário pode ser adicionado aqui, se disponível
-              accountEmail: Text(email ?? 'E-mail não disponível'), // Exibe o e-mail do usuário logado
-              currentAccountPicture: const CircleAvatar(
-                backgroundImage: AssetImage('assets/img/people.jpg'),
-              ),
-              decoration: const BoxDecoration(
-                color: Color(0xFFBA68C8),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text('Editar Perfil'),
-              onTap: () {
-                Navigator.pop(context); // Fecha o Drawer
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const EditarPerfilIdoso(
-                      idosoId: 'ID_DO_IDOSO_AQUI', // Substituir pelo ID do idoso
-                    ),
+      drawer: FutureBuilder<String?>(
+        future: fetchNomeUsuario(user?.uid ?? ''), // Busca o nome do usuário
+        builder: (context, snapshot) {
+          String nomeUsuario = 'Nome não disponível';
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            nomeUsuario = 'Carregando...'; // Exibe mensagem enquanto carrega
+          } else if (snapshot.hasData) {
+            nomeUsuario = snapshot.data ?? 'Nome não disponível'; // Nome obtido do Firestore
+          }
+          
+          return Drawer(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                UserAccountsDrawerHeader(
+                  accountName: Text(nomeUsuario), // Nome do usuário obtido do Firestore
+                  accountEmail: Text(email ?? 'E-mail não disponível'), // Exibe o e-mail do usuário logado
+                  currentAccountPicture: const CircleAvatar(
+                    backgroundImage: AssetImage('assets/img/people.jpg'),
                   ),
-                );
-              },
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFBA68C8),
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.edit),
+                  title: const Text('Editar Perfil'),
+                  onTap: () {
+                    Navigator.pop(context); // Fecha o Drawer
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const EditarPerfilIdoso(
+                          idosoId: 'ID_DO_IDOSO_AQUI', // Substituir pelo ID do idoso
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.exit_to_app),
+                  title: const Text('Logoff'),
+                  onTap: () {
+                    _logout(context);
+                  },
+                ),
+              ],
             ),
-            ListTile(
-              leading: const Icon(Icons.exit_to_app),
-              title: const Text('Logoff'),
-              onTap: () {
-                _logout(context);
-              },
-            ),
-          ],
-        ),
+          );
+        },
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: fetchProfissionais(),
