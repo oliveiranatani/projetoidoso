@@ -83,6 +83,32 @@ class _CadastroPageState extends State<CadastroPage> {
             ),
             const SizedBox(height: 16),
             TextField(
+              controller: cpfController,
+              decoration: InputDecoration(
+                labelText: 'CPF',
+                filled: true,
+                fillColor: const Color(0xFFE1BEE7),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: birthdateController,
+              decoration: InputDecoration(
+                labelText: 'Data de Nascimento',
+                filled: true,
+                fillColor: const Color(0xFFE1BEE7),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
               controller: passwordController,
               decoration: InputDecoration(
                 labelText: 'Senha',
@@ -108,32 +134,6 @@ class _CadastroPageState extends State<CadastroPage> {
                 ),
               ),
               obscureText: true,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: cpfController,
-              decoration: InputDecoration(
-                labelText: 'CPF',
-                filled: true,
-                fillColor: const Color(0xFFE1BEE7),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30.0),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: birthdateController,
-              decoration: InputDecoration(
-                labelText: 'Data de Nascimento',
-                filled: true,
-                fillColor: const Color(0xFFE1BEE7),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30.0),
-                  borderSide: BorderSide.none,
-                ),
-              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(

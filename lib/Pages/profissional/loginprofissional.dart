@@ -45,7 +45,7 @@ class _LoginProfissionalState extends State<LoginProfissional> {
         title: const Text('Login Profissional'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(30.0),
         child: Column(
           children: [
             // Campo de E-mail
