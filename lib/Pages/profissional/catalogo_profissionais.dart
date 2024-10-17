@@ -1,8 +1,9 @@
 import 'package:appidoso/Pages/idoso/login_idoso.dart';
+import 'package:appidoso/Pages/idoso/perfilidoso.dart';
+import 'package:appidoso/Servicos/dadosIdoso.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:appidoso/Pages/idoso/editarperfilidoso.dart';
 import 'detalhesprofissional.dart';
 
 class CatalogoProfissionais extends StatelessWidget {
@@ -12,34 +13,24 @@ class CatalogoProfissionais extends StatelessWidget {
     try {
       final QuerySnapshot result =
           await FirebaseFirestore.instance.collection('profissional').get();
-      print("Total de profissionais encontrados: ${result.docs.length}");
-
       return result.docs
           .map((doc) => doc.data() as Map<String, dynamic>)
           .toList();
     } catch (e) {
-      print("Erro ao buscar profissionais: $e");
       return [];
     }
   }
 
-  Future<String?> fetchNomeUsuario(String uid) async {
-    try {
-      final DocumentSnapshot userDoc =
-          await FirebaseFirestore.instance.collection('user').doc(uid).get();
-      if (userDoc.exists) {
-        return userDoc.get('nome');
-      }
-    } catch (e) {
-      print("Erro ao buscar nome do usuário: $e");
-    }
-    return null; // Retorna null se não encontrar ou ocorrer erro
-  }
-
   @override
   Widget build(BuildContext context) {
-    final User? user = FirebaseAuth.instance.currentUser; // Pega o usuário logado
-    final String? email = user?.email; // E-mail do usuário logado
+
+    final User? user =
+    
+    FirebaseAuth.instance.currentUser; 
+    final String? email = user?.email; 
+    final String? userid = user?.uid; 
+
+    final usuario = DadosIdoso();
 
     return Scaffold(
       appBar: AppBar(
@@ -58,23 +49,26 @@ class CatalogoProfissionais extends StatelessWidget {
           ),
         ],
       ),
-      drawer: FutureBuilder<String?>(
-        future: fetchNomeUsuario(user?.uid ?? ''), // Busca o nome do usuário
+      drawer: FutureBuilder<String?>( 
+        future: usuario.fetchNomeUsuario(user?.uid ?? ''), // Busca o nome do usuário
         builder: (context, snapshot) {
           String nomeUsuario = 'Nome não disponível';
           if (snapshot.connectionState == ConnectionState.waiting) {
             nomeUsuario = 'Carregando...'; // Exibe mensagem enquanto carrega
           } else if (snapshot.hasData) {
-            nomeUsuario = snapshot.data ?? 'Nome não disponível'; // Nome obtido do Firestore
+            nomeUsuario = snapshot.data ??
+                'Nome não disponível'; // Nome obtido do Firestore
           }
-          
+
           return Drawer(
             child: ListView(
               padding: EdgeInsets.zero,
               children: <Widget>[
                 UserAccountsDrawerHeader(
-                  accountName: Text(nomeUsuario), // Nome do usuário obtido do Firestore
-                  accountEmail: Text(email ?? 'E-mail não disponível'), // Exibe o e-mail do usuário logado
+                  accountName:
+                      Text(nomeUsuario), // Nome do usuário obtido do Firestore
+                  accountEmail: Text(email ??
+                      'E-mail não disponível'), // Exibe o e-mail do usuário logado
                   currentAccountPicture: const CircleAvatar(
                     backgroundImage: AssetImage('assets/img/people.jpg'),
                   ),
@@ -83,17 +77,15 @@ class CatalogoProfissionais extends StatelessWidget {
                   ),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.edit),
-                  title: const Text('Editar Perfil'),
+                  leading: const Icon(Icons.person),
+                  title: const Text('Meu Perfil'),
                   onTap: () {
                     Navigator.pop(context); // Fecha o Drawer
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const EditarPerfilIdoso(
-                          idosoId: 'ID_DO_IDOSO_AQUI', // Substituir pelo ID do idoso
-                        ),
-                      ),
+                          builder: (context) =>
+                              const MeuPerfil()), // Navega para a tela de Meu Perfil
                     );
                   },
                 ),
@@ -120,6 +112,7 @@ class CatalogoProfissionais extends StatelessWidget {
             return const Center(child: Text('Nenhum profissional cadastrado.'));
           } else {
             final profissionais = snapshot.data!;
+            print(profissionais);
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,51 +137,77 @@ class CatalogoProfissionais extends StatelessWidget {
                       final profissional = profissionais[index];
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => DetalhesProfissional(
-                                  profissional: profissional,
+                        child: Card(
+                          elevation: 5,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            DetalhesProfissional(
+                                          profissional: profissional,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        profissional['nome'] ??
+                                            'Nome não disponível',
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        profissional['profissao1'] ??
+                                            'Profissão não disponível',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        profissional['email'] ??
+                                            'Email não disponível',
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                          child: Card(
-                            elevation: 5,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    profissional['nome'] ?? 'Nome não disponível',
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    profissional['profissao1'] ?? 'Profissão não disponível',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    profissional['email'] ?? 'Email não disponível',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                const SizedBox(
+                                  width: 20,
+                                ),
+                                IconButton(
+                                  onPressed: () 
+                                  async {
+                                  await usuario.solicitarContato(profissional['email'], userid);
+                                  },
+                                  icon: const Icon(Icons.mail, size: 40,),
+                                ),
+                                const SizedBox(
+                                  width: 20,
+                                ),
+                                IconButton(
+                                  onPressed: () {}, //Adicionar para ir ao whats
+                                  icon: const Icon(Icons.phone, size: 40,),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -209,7 +228,7 @@ class CatalogoProfissionais extends StatelessWidget {
       await FirebaseAuth.instance.signOut();
       // Navegar de volta para a tela de login
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const LoginIdoso()), // Substitua LoginIdoso pela sua tela de login
+        MaterialPageRoute(builder: (context) => const LoginIdoso()),
       );
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Você foi desconectado com sucesso!')),

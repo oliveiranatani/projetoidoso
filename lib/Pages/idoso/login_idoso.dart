@@ -3,7 +3,8 @@ import 'package:appidoso/Pages/profissional/catalogo_profissionais.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:appidoso/comum/meuSnackbar.dart'; // Importando a função
+import 'package:appidoso/comum/meuSnackbar.dart'; // Importando a função mostrarSnackbar
+import 'package:appidoso/Servicos/shared_preferences_service.dart'; // Importando o SharedPreferencesService
 
 class LoginIdoso extends StatefulWidget {
   const LoginIdoso({super.key});
@@ -25,12 +26,19 @@ class _LoginIdosoState extends State<LoginIdoso> {
         email: emailController.text,
         password: passwordController.text,
       );
+
+      String uid = userCredential.user!.uid;
+
+      // Salva o ID do idoso nos SharedPreferences
+      await SharedPreferencesService.saveIdIdoso(uid);
+
       // Exibir mensagem de sucesso
       mostrarSnackbar(
         context: context,
         texto: 'Login realizado com sucesso!',
         isErro: false,
       );
+
       // Navegar para a tela CatalogoProfissionais após o login bem-sucedido
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
@@ -39,6 +47,7 @@ class _LoginIdosoState extends State<LoginIdoso> {
       );
     } catch (e) {
       print("Erro no login: $e");
+
       // Exibir mensagem de erro
       mostrarSnackbar(
         context: context,

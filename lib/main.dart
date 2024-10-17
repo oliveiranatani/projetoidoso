@@ -2,7 +2,6 @@ import 'package:appidoso/Pages/homePage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(); // Inicializa o Firebase
@@ -20,6 +19,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.purple,
       ),
       home: const Homepage(), // Wrapper para lidar com estado de autenticação
+      debugShowCheckedModeBanner: false, // Remove o banner de depuração
     );
   }
 }
@@ -51,4 +51,3 @@ class MyApp extends StatelessWidget {
 //     );
 //   }
 // }
-

@@ -1,5 +1,6 @@
 import 'package:appidoso/Pages/idoso/catalogo_idoso.dart';
 import 'package:appidoso/Pages/profissional/cadastro_profissional.dart';
+import 'package:appidoso/Servicos/shared_preferences_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -24,6 +25,11 @@ class _LoginProfissionalState extends State<LoginProfissional> {
         email: emailController.text,
         password: passwordController.text,
       );
+
+      String uid = userCredential.user!.uid;
+
+      await SharedPreferencesService.saveIdProfissional(uid);
+
       // Navegar para a tela CatalogoProfissionais após o login bem-sucedido
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(

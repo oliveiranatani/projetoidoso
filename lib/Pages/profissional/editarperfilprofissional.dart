@@ -3,20 +3,21 @@
 // import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:image_picker/image_picker.dart';
 
-// class EditarPerfilIdoso extends StatefulWidget {
-//   final String idosoId;
+// class EditarPerfilProfissional extends StatefulWidget {
+//   final String profissionalId;
 
-//   const EditarPerfilIdoso({super.key, required this.idosoId});
+//   const EditarPerfilProfissional({super.key, required this.profissionalId});
 
 //   @override
-//   _EditarPerfilIdosoState createState() => _EditarPerfilIdosoState();
+//   _EditarPerfilProfissionalState createState() => _EditarPerfilProfissionalState();
 // }
 
-// class _EditarPerfilIdosoState extends State<EditarPerfilIdoso> {
+// class _EditarPerfilProfissionalState extends State<EditarPerfilProfissional> {
 //   final _formKey = GlobalKey<FormState>();
 //   final TextEditingController _nomeController = TextEditingController();
 //   final TextEditingController _emailController = TextEditingController();
 //   final TextEditingController _telefoneController = TextEditingController();
+//   final TextEditingController _especializacaoController = TextEditingController();
 //   String? _imagemUrl; // Para armazenar a URL da imagem
 
 //   final ImagePicker _picker = ImagePicker(); // Inicializa o ImagePicker
@@ -25,13 +26,13 @@
 //   @override
 //   void initState() {
 //     super.initState();
-//     _carregarDadosIdoso();
+//     _carregarDadosProfissional();
 //   }
 
-//   void _carregarDadosIdoso() async {
+//   void _carregarDadosProfissional() async {
 //     DocumentSnapshot snapshot = await FirebaseFirestore.instance
-//         .collection('idosos')
-//         .doc(widget.idosoId)
+//         .collection('profissionais')
+//         .doc(widget.profissionalId)
 //         .get();
     
 //     if (snapshot.exists) {
@@ -39,6 +40,7 @@
 //         _nomeController.text = snapshot['nome'];
 //         _emailController.text = snapshot['email'];
 //         _telefoneController.text = snapshot['telefone'];
+//         _especializacaoController.text = snapshot['especializacao'];
 //         _imagemUrl = snapshot['imagemUrl']; // Carrega a URL da imagem, se disponível
 //       });
 //     }
@@ -78,12 +80,13 @@
 //     if (_formKey.currentState!.validate()) {
 //       // Atualizar os dados no Firestore
 //       await FirebaseFirestore.instance
-//           .collection('idosos')
-//           .doc(widget.idosoId)
+//           .collection('profissionais')
+//           .doc(widget.profissionalId)
 //           .update({
 //         'nome': _nomeController.text,
 //         'email': _emailController.text,
 //         'telefone': _telefoneController.text,
+//         'especializacao': _especializacaoController.text,
 //         'imagemUrl': _imagemUrl, // Atualiza a URL da imagem, se necessário
 //       });
 
@@ -97,7 +100,7 @@
 //   Widget build(BuildContext context) {
 //     return Scaffold(
 //       appBar: AppBar(
-//         title: const Text('Editar Perfil'),
+//         title: const Text('Editar Perfil Profissional'),
 //         backgroundColor: Colors.purple[300],
 //       ),
 //       body: Padding(
@@ -150,6 +153,17 @@
 //                 validator: (value) {
 //                   if (value == null || value.isEmpty) {
 //                     return 'Por favor, insira seu telefone';
+//                   }
+//                   return null;
+//                 },
+//               ),
+//               const SizedBox(height: 16.0),
+//               TextFormField(
+//                 controller: _especializacaoController,
+//                 decoration: const InputDecoration(labelText: 'Especialização'),
+//                 validator: (value) {
+//                   if (value == null || value.isEmpty) {
+//                     return 'Por favor, insira sua especialização';
 //                   }
 //                   return null;
 //                 },

@@ -1,34 +1,105 @@
+import 'package:appidoso/Pages/idoso/perfilidoso.dart';
+import 'package:appidoso/Pages/profissional/loginprofissional.dart';
+import 'package:appidoso/Servicos/dadosProfissional.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CatalogoIdosos extends StatelessWidget {
   const CatalogoIdosos({super.key});
 
-  Future<List<Map<String, dynamic>>> fetchIdosos() async {
+
+  Future<String?> fetchNomeUsuario(String uid) async {
     try {
-      final QuerySnapshot result = await FirebaseFirestore.instance.collection('idoso').get();
-      print("Total de idosos encontrados: ${result.docs.length}");
-
-      for (var doc in result.docs) {
-        print("Idoso: ${doc.id} => ${doc.data()}");
+      final DocumentSnapshot userDoc =
+          await FirebaseFirestore.instance.collection('profissional').doc(uid).get();
+      if (userDoc.exists) {
+        return userDoc.get('nome');
       }
-
-      return result.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
     } catch (e) {
-      print("Erro ao buscar idosos: $e");
-      return [];
+      print("Erro ao buscar nome do usuário: $e");
     }
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
+    final User? user = FirebaseAuth.instance.currentUser; // Pega o usuário logado
+    final String? email = user?.email; // E-mail do usuário logado
+    final dadosprofissional = Dadosprofissional();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Catálogo de Idosos'),
         backgroundColor: const Color(0xFFBA68C8),
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              icon: const CircleAvatar(
+                backgroundImage: AssetImage('assets/img/people.jpg'), //arrumar colocar a do editar perfil
+              ),
+              onPressed: () {
+                Scaffold.of(context).openDrawer(); // Abre o Drawer
+              },
+            ),
+          ),
+        ],
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: fetchIdosos(),
+      drawer: FutureBuilder<String?>(
+        future: fetchNomeUsuario(user?.uid ?? ''),
+        builder: (context, snapshot) {
+          String nomeUsuario = 'Nome não disponível';
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            nomeUsuario = 'Carregando...';
+          } else if (snapshot.hasData) {
+            nomeUsuario = snapshot.data ?? 'Nome não disponível';
+          }
+
+          return Drawer(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                UserAccountsDrawerHeader(
+                  accountName: Text(nomeUsuario),
+                  accountEmail: Text(email ?? 'E-mail não disponível'),
+                  currentAccountPicture: const CircleAvatar(
+                    backgroundImage: AssetImage('assets/img/people.jpg'), //arrumar colocar a do editar perfil
+                  ),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFBA68C8),
+                  ),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.person),
+                  title: const Text('Meu Perfil'),
+                  onTap: () {
+                    Navigator.pop(context); // Fecha o Drawer
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MeuPerfil()), // Navega para a tela de Meu Perfil
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.exit_to_app),
+                  title: const Text('Logoff'),
+                  onTap: () async {
+                    await FirebaseAuth.instance.signOut();
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => const LoginProfissional()),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Você foi desconectado com sucesso!')),
+                    );
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+      body: FutureBuilder<List<Map<String, dynamic>>>(  // Carrega os idosos
+        future: dadosprofissional.fetchIdosos(email as String),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -38,7 +109,6 @@ class CatalogoIdosos extends StatelessWidget {
             return const Center(child: Text('Nenhum idoso cadastrado.'));
           } else {
             final idosos = snapshot.data!;
-
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -81,7 +151,7 @@ class CatalogoIdosos extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  idoso['cpf'] ?? 'CPF não disponível',
+                                  idoso['data_servico'] ?? 'CPF não disponível',
                                   style: const TextStyle(
                                     fontSize: 16,
                                   ),
