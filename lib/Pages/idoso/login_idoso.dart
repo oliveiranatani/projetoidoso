@@ -19,6 +19,9 @@ class _LoginIdosoState extends State<LoginIdoso> {
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  
+  // Adicionando a variável _obscureText
+  bool _obscureText = true; // Inicializa como true para ocultar a senha
 
   Future<void> _login() async {
     try {
@@ -82,6 +85,7 @@ class _LoginIdosoState extends State<LoginIdoso> {
             const SizedBox(height: 16),
             TextField(
               controller: passwordController,
+              obscureText: _obscureText, // Definindo a visibilidade da senha
               decoration: InputDecoration(
                 labelText: 'Senha',
                 filled: true,
@@ -90,8 +94,17 @@ class _LoginIdosoState extends State<LoginIdoso> {
                   borderRadius: BorderRadius.circular(30.0),
                   borderSide: BorderSide.none,
                 ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureText ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureText = !_obscureText; // Alterna o estado de visibilidade
+                    });
+                  },
+                ),
               ),
-              obscureText: true,
             ),
             const SizedBox(height: 20),
             ElevatedButton(

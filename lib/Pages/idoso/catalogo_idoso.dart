@@ -1,5 +1,6 @@
 import 'package:appidoso/Pages/idoso/perfilidoso.dart';
 import 'package:appidoso/Pages/profissional/loginprofissional.dart';
+import 'package:appidoso/Pages/profissional/perfilprofissional.dart';
 import 'package:appidoso/Servicos/dadosProfissional.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -76,7 +77,7 @@ class CatalogoIdosos extends StatelessWidget {
                     Navigator.pop(context); // Fecha o Drawer
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const MeuPerfil()), // Navega para a tela de Meu Perfil
+                      MaterialPageRoute(builder: (context) => const MeuPerfilProfissional()), // Navega para a tela de Meu Perfil
                     );
                   },
                 ),

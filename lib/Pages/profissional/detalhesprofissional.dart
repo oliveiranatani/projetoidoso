@@ -26,7 +26,7 @@ class DetalhesProfissional extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'Profissão: ${profissional['profissao1'] ?? 'Profissão não disponível'}',
+              'Profissão: ${profissional['profissao'] ?? 'Profissão não disponível'}',
               style: const TextStyle(
                 fontSize: 18,
               ),

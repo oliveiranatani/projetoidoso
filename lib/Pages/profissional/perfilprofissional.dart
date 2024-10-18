@@ -2,32 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class MeuPerfil extends StatelessWidget {
-  const MeuPerfil({super.key});
+class MeuPerfilProfissional extends StatelessWidget {
+  const MeuPerfilProfissional({super.key});
 
-  Future<Map<String, dynamic>?> fetchUserProfile(String uid) async {
+  Future<Map<String, dynamic>?> fetchProfissionalProfile(String uid) async {
     try {
-      final DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('user').doc(uid).get();
-      if (userDoc.exists) {
-        return userDoc.data() as Map<String, dynamic>;
+      final DocumentSnapshot profissionalDoc = await FirebaseFirestore.instance.collection('profissional').doc(uid).get();
+      if (profissionalDoc.exists) {
+        return profissionalDoc.data() as Map<String, dynamic>;
       }
     } catch (e) {
-      print("Erro ao buscar perfil: $e");
+      print('Erro ao buscar dados do profissional: $e');
     }
     return null;
   }
 
-  Future<void> updateUserProfile(BuildContext context, String uid, String nome) async {
+  Future<void> updateProfissionalProfile(BuildContext context, String uid, String nome, String profissao, String especializacao, String conselho) async {
     try {
-      await FirebaseFirestore.instance.collection('user').doc(uid).update({
+      await FirebaseFirestore.instance.collection('profissional').doc(uid).update({
         'nome': nome,
+        'profissao1': profissao,
+        'especializacao': especializacao,
+        'cr1': conselho,
       });
-      // Exibe uma mensagem de sucesso após salvar as alterações
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Perfil atualizado com sucesso!')),
       );
     } catch (e) {
-      // Exibe uma mensagem de erro
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro ao atualizar perfil: $e')),
       );
@@ -36,32 +37,32 @@ class MeuPerfil extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final User? user = FirebaseAuth.instance.currentUser;
+    final User? profissional = FirebaseAuth.instance.currentUser;
     final TextEditingController nomeController = TextEditingController();
     final TextEditingController emailController = TextEditingController();
-    final TextEditingController cpfController = TextEditingController();
-    final TextEditingController dtNascController = TextEditingController();
+    final TextEditingController profissaoController = TextEditingController();
+    final TextEditingController especializacaoController = TextEditingController();
+    final TextEditingController concelhoController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Meu Perfil'),
+        title: const Text('Meu Perfil Profissional'),
         backgroundColor: const Color(0xFFBA68C8),
       ),
       body: FutureBuilder<Map<String, dynamic>?>(
-        future: fetchUserProfile(user?.uid ?? ''),
+        future: fetchProfissionalProfile(profissional?.uid ?? ''),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
+          } else if (snapshot.hasError || !snapshot.hasData) {
             return const Center(child: Text('Erro ao carregar perfil'));
-          } else if (!snapshot.hasData) {
-            return const Center(child: Text('Perfil não encontrado.'));
           } else {
-            final userData = snapshot.data!;
-            nomeController.text = userData['nome'] ?? 'Nome não disponível';
-            emailController.text = userData['email'] ?? 'E-mail não disponível';
-            cpfController.text = userData['cpf'] ?? 'CPF não disponível';
-            dtNascController.text = userData['dtNasc'] ?? 'Data de nascimento não disponível';
+            final profissionalData = snapshot.data!;
+            nomeController.text = profissionalData['nome'] ?? 'Nome não disponível';
+            emailController.text = profissionalData['email'] ?? 'E-mail não disponível';
+            profissaoController.text = profissionalData['profissao1'] ?? 'Não informado';
+            especializacaoController.text = profissionalData['especializacao'] ?? 'Não informado';
+            concelhoController.text = profissionalData['cr1'] ?? 'Não informado';
 
             return Padding(
               padding: const EdgeInsets.all(16.0),
@@ -84,31 +85,43 @@ class MeuPerfil extends StatelessWidget {
                     ),
                     readOnly: true, // E-mail não pode ser editado
                   ),
-                    const SizedBox(height: 10),
-                  TextFormField(
-                    controller: dtNascController,
-                    decoration: const InputDecoration(
-                      labelText: 'Data de Nascimento',
-                      border: OutlineInputBorder(),
-                    ),
-                    readOnly: true, // Data de nascimento não pode ser editado
-                  ),
                   const SizedBox(height: 10),
                   TextFormField(
-                    controller: cpfController,
+                    controller: profissaoController,
                     decoration: const InputDecoration(
-                      labelText: 'CPF',
+                      labelText: 'Profissão',
                       border: OutlineInputBorder(),
                     ),
-                    readOnly: true, // CPF não pode ser editado
                   ),
                   const SizedBox(height: 20),
+                  TextFormField(
+                    controller: especializacaoController,
+                    decoration: const InputDecoration(
+                      labelText: 'Especialização',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: concelhoController,
+                    decoration: const InputDecoration(
+                      labelText: 'Conselho Regional',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
                   Center(
                     child: ElevatedButton(
                       onPressed: () {
-                        // Salva as alterações no Firestore
-                        if (user != null) {
-                          updateUserProfile(context, user.uid, nomeController.text);
+                        if (profissional != null) {
+                          updateProfissionalProfile(
+                            context,
+                            profissional.uid,
+                            nomeController.text,
+                            profissaoController.text,
+                            especializacaoController.text,
+                            concelhoController.text,
+                          );
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -116,7 +129,7 @@ class MeuPerfil extends StatelessWidget {
                       ),
                       child: const Text(
                         'Salvar Alterações',
-                        style: TextStyle(color: Colors.white), 
+                        style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ),

@@ -25,6 +25,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  brasil_datetime:
+    dependency: "direct main"
+    description:
+      name: brasil_datetime
+      sha256: "26ec91de510c3634ea069645b9a893b9359757ef93e05ed184753921c1eb2de7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.4"
+  brasil_fields:
+    dependency: "direct main"
+    description:
+      name: brasil_fields
+      sha256: "3caea1fa56a025106014393c22dc651de8f1b17faf6cdcc504c8127a17cf2d1e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.9.1"
   characters:
     dependency: transitive
     description:
@@ -328,6 +344,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1+1"
+  intl:
+    dependency: "direct main"
+    description:
+      name: intl
+      sha256: "910f85bce16fb5c6f614e117efa303e85a1731bb0081edf3604a2ae6e9a3cc91"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.17.0"
   leak_tracker:
     dependency: transitive
     description:

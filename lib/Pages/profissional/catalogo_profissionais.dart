@@ -1,5 +1,6 @@
 import 'package:appidoso/Pages/idoso/login_idoso.dart';
 import 'package:appidoso/Pages/idoso/perfilidoso.dart';
+import 'package:appidoso/Pages/profissional/perfilprofissional.dart';
 import 'package:appidoso/Servicos/dadosIdoso.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -23,10 +24,7 @@ class CatalogoProfissionais extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    final User? user =
-    
-    FirebaseAuth.instance.currentUser; 
+    final User? user = FirebaseAuth.instance.currentUser; 
     final String? email = user?.email; 
     final String? userid = user?.uid; 
 
@@ -49,15 +47,14 @@ class CatalogoProfissionais extends StatelessWidget {
           ),
         ],
       ),
-      drawer: FutureBuilder<String?>( 
+      drawer: FutureBuilder<String?>(
         future: usuario.fetchNomeUsuario(user?.uid ?? ''), // Busca o nome do usuário
         builder: (context, snapshot) {
           String nomeUsuario = 'Nome não disponível';
           if (snapshot.connectionState == ConnectionState.waiting) {
             nomeUsuario = 'Carregando...'; // Exibe mensagem enquanto carrega
           } else if (snapshot.hasData) {
-            nomeUsuario = snapshot.data ??
-                'Nome não disponível'; // Nome obtido do Firestore
+            nomeUsuario = snapshot.data ?? 'Nome não disponível'; // Nome obtido do Firestore
           }
 
           return Drawer(
@@ -65,10 +62,8 @@ class CatalogoProfissionais extends StatelessWidget {
               padding: EdgeInsets.zero,
               children: <Widget>[
                 UserAccountsDrawerHeader(
-                  accountName:
-                      Text(nomeUsuario), // Nome do usuário obtido do Firestore
-                  accountEmail: Text(email ??
-                      'E-mail não disponível'), // Exibe o e-mail do usuário logado
+                  accountName: Text(nomeUsuario),
+                  accountEmail: Text(email ?? 'E-mail não disponível'),
                   currentAccountPicture: const CircleAvatar(
                     backgroundImage: AssetImage('assets/img/people.jpg'),
                   ),
@@ -84,8 +79,7 @@ class CatalogoProfissionais extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>
-                              const MeuPerfil()), // Navega para a tela de Meu Perfil
+                          builder: (context) => const MeuPerfil()), // Navega para a tela de Meu Perfil Profissional
                     );
                   },
                 ),
@@ -112,7 +106,6 @@ class CatalogoProfissionais extends StatelessWidget {
             return const Center(child: Text('Nenhum profissional cadastrado.'));
           } else {
             final profissionais = snapshot.data!;
-            print(profissionais);
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,8 +156,7 @@ class CatalogoProfissionais extends StatelessWidget {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        profissional['nome'] ??
-                                            'Nome não disponível',
+                                        profissional['nome'] ?? 'Nome não disponível',
                                         style: const TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
@@ -172,16 +164,14 @@ class CatalogoProfissionais extends StatelessWidget {
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
-                                        profissional['profissao1'] ??
-                                            'Profissão não disponível',
+                                        profissional['profissao1'] ?? 'Profissão não disponível',
                                         style: const TextStyle(
                                           fontSize: 16,
                                         ),
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
-                                        profissional['email'] ??
-                                            'Email não disponível',
+                                        profissional['email'] ?? 'Email não disponível',
                                         style: const TextStyle(
                                           fontSize: 14,
                                           color: Colors.grey,
@@ -190,22 +180,17 @@ class CatalogoProfissionais extends StatelessWidget {
                                     ],
                                   ),
                                 ),
-                                const SizedBox(
-                                  width: 20,
-                                ),
+                                const SizedBox(width: 20),
                                 IconButton(
-                                  onPressed: () 
-                                  async {
-                                  await usuario.solicitarContato(profissional['email'], userid);
+                                  onPressed: () async {
+                                    await usuario.solicitarContato(profissional['email'], userid);
                                   },
-                                  icon: const Icon(Icons.mail, size: 40,),
+                                  icon: const Icon(Icons.mail, size: 40),
                                 ),
-                                const SizedBox(
-                                  width: 20,
-                                ),
+                                const SizedBox(width: 20),
                                 IconButton(
-                                  onPressed: () {}, //Adicionar para ir ao whats
-                                  icon: const Icon(Icons.phone, size: 40,),
+                                  onPressed: () {}, // Adicionar funcionalidade para WhatsApp
+                                  icon: const Icon(Icons.phone, size: 40),
                                 ),
                               ],
                             ),

@@ -18,6 +18,8 @@ class _LoginProfissionalState extends State<LoginProfissional> {
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  
+  bool _obscureText = true; // Adicionando a variável para controlar a visibilidade da senha
 
   Future<void> _login() async {
     try {
@@ -30,7 +32,7 @@ class _LoginProfissionalState extends State<LoginProfissional> {
 
       await SharedPreferencesService.saveIdProfissional(uid);
 
-      // Navegar para a tela CatalogoProfissionais após o login bem-sucedido
+      // Navegar para a tela CatalogoIdosos após o login bem-sucedido
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => const CatalogoIdosos(),
@@ -80,8 +82,18 @@ class _LoginProfissionalState extends State<LoginProfissional> {
                   borderRadius: BorderRadius.circular(30.0),
                   borderSide: BorderSide.none,
                 ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureText ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureText = !_obscureText; // Alterna o estado de visibilidade
+                    });
+                  },
+                ),
               ),
-              obscureText: true,
+              obscureText: _obscureText, // Utilizando a variável para controle de visibilidade
             ),
             const SizedBox(height: 20),
             // Botão de Entrar

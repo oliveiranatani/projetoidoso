@@ -20,6 +20,9 @@ class _CadastroProfissionalState extends State<CadastroProfissional> {
   final TextEditingController senhaController = TextEditingController();
   final TextEditingController confirmaSenhaController = TextEditingController();
 
+  bool _obscureSenha = true; // Para o campo de senha
+  bool _obscureConfirmaSenha = true; // Para o campo de confirmar senha
+
   void _cadastrar() async {
     final cadastro = AutenticacaoServicoProfissional();
 
@@ -28,17 +31,27 @@ class _CadastroProfissionalState extends State<CadastroProfissional> {
         nome: nomeController.text,
         email: emailController.text,
         profissao: profissaoController.text,
-        concelho: conselhoRegionalController.text,
-        especializacao: especializacaoController.text,
         senha: senhaController.text,
         confirSenha: confirmaSenhaController.text,
       );
+
       // Exibir mensagem de sucesso
       mostrarSnackbar(
         context: context,
         texto: 'Cadastro realizado com sucesso!',
         isErro: false,
       );
+
+      // Verificação dos campos essenciais após o cadastro
+      if (profissaoController.text.isEmpty || 
+          conselhoRegionalController.text.isEmpty || 
+          especializacaoController.text.isEmpty) {
+        mostrarSnackbar(
+          context: context,
+          texto: 'Complete seu cadastro em Meu Perfil para adicionar informações faltantes.',
+        );
+      }
+
       // Navegar para a tela de login ou outra tela, se necessário
       Navigator.pushReplacement(
         context,
@@ -50,6 +63,7 @@ class _CadastroProfissionalState extends State<CadastroProfissional> {
       mostrarSnackbar(
         context: context,
         texto: 'Erro ao cadastrar. Tente novamente.',
+        isErro: true, // Aqui você pode passar true se for um erro
       );
     }
   }
@@ -118,40 +132,6 @@ class _CadastroProfissionalState extends State<CadastroProfissional> {
             ),
             const SizedBox(height: 16),
 
-            // Campo Conselho Regional
-            TextField(
-              controller: conselhoRegionalController,
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
-              decoration: InputDecoration(
-                labelText: 'Conselho Regional',
-                filled: true,
-                fillColor: const Color(0xFFE1BEE7),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30.0),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Campo Especialização
-            TextField(
-              controller: especializacaoController,
-              decoration: InputDecoration(
-                labelText: 'Especialização',
-                filled: true,
-                fillColor: const Color(0xFFE1BEE7),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30.0),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
             // Campo Senha
             TextField(
               controller: senhaController,
@@ -163,8 +143,20 @@ class _CadastroProfissionalState extends State<CadastroProfissional> {
                   borderRadius: BorderRadius.circular(30.0),
                   borderSide: BorderSide.none,
                 ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureSenha
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureSenha = !_obscureSenha;
+                    });
+                  },
+                ),
               ),
-              obscureText: true,
+              obscureText: _obscureSenha,
             ),
             const SizedBox(height: 16),
 
@@ -179,8 +171,20 @@ class _CadastroProfissionalState extends State<CadastroProfissional> {
                   borderRadius: BorderRadius.circular(30.0),
                   borderSide: BorderSide.none,
                 ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureConfirmaSenha
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureConfirmaSenha = !_obscureConfirmaSenha;
+                    });
+                  },
+                ),
               ),
-              obscureText: true,
+              obscureText: _obscureConfirmaSenha,
             ),
             const SizedBox(height: 20),
 

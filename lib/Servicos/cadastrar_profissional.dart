@@ -9,8 +9,8 @@ class AutenticacaoServicoProfissional {
     required String nome, 
     required String email, // CPF como string
     required String profissao, 
-    required String concelho, 
-    required String especializacao, 
+    // required String concelho, 
+    // required String especializacao, 
     required String senha,
     required String confirSenha
   }) async {
@@ -30,8 +30,8 @@ class AutenticacaoServicoProfissional {
         'nome': nome,
         'email': email,
         'profissao1': profissao,
-        'cr1': concelho,
-        'especializacao': especializacao,
+        // 'cr1': concelho,
+        // 'especializacao': especializacao,
       });
 
 

@@ -1,7 +1,9 @@
 import 'package:appidoso/Pages/idoso/login_idoso.dart';
 import 'package:appidoso/Servicos/cadastrar_idoso.dart';
+import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/material.dart';
-import 'package:appidoso/comum/meuSnackbar.dart'; // Importando a função
+import 'package:appidoso/comum/meuSnackbar.dart';
+import 'package:flutter/services.dart'; // Importando a função
 
 class CadastroPage extends StatefulWidget {
   const CadastroPage({super.key});
@@ -17,6 +19,8 @@ class _CadastroPageState extends State<CadastroPage> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController cpfController = TextEditingController();
   final TextEditingController birthdateController = TextEditingController();
+  
+  bool _obscureText = true; // Variável para controlar a visibilidade da senha
 
   void _register() async {
     final cadastrar = AutenticacaoServico();
@@ -97,6 +101,10 @@ class _CadastroPageState extends State<CadastroPage> {
             const SizedBox(height: 16),
             TextField(
               controller: birthdateController,
+              inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            DataInputFormatter(),
+                          ],
               decoration: InputDecoration(
                 labelText: 'Data de Nascimento',
                 filled: true,
@@ -118,8 +126,18 @@ class _CadastroPageState extends State<CadastroPage> {
                   borderRadius: BorderRadius.circular(30.0),
                   borderSide: BorderSide.none,
                 ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureText ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureText = !_obscureText; // Alterna o estado de visibilidade
+                    });
+                  },
+                ),
               ),
-              obscureText: true,
+              obscureText: _obscureText, // Controla a visibilidade da senha
             ),
             const SizedBox(height: 16),
             TextField(
@@ -132,8 +150,18 @@ class _CadastroPageState extends State<CadastroPage> {
                   borderRadius: BorderRadius.circular(30.0),
                   borderSide: BorderSide.none,
                 ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureText ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureText = !_obscureText; // Alterna o estado de visibilidade
+                    });
+                  },
+                ),
               ),
-              obscureText: true,
+              obscureText: _obscureText,
             ),
             const SizedBox(height: 20),
             ElevatedButton(
@@ -142,7 +170,7 @@ class _CadastroPageState extends State<CadastroPage> {
                 backgroundColor: const Color(0xFF892CDB),
               ),
               child: const Text('Cadastrar',
-               style: TextStyle(color: Colors.white),),
+                style: TextStyle(color: Colors.white),),
             ),
             const SizedBox(height: 20),
             Row(
