@@ -20,13 +20,14 @@ class DadosIdoso {
     return null; // Retorna null se não encontrar ou ocorrer erro
   }
 
-  Future<void> solicitarContato(String profissionalId, String? idosoId) async {
+  Future<void> solicitarContato(String profissionalId, String? idosoId, String observacao) async {
     final String dataAtual = DateTime.now().toIso8601String(); 
     if (idosoId != null) {
       try {
         await FirebaseFirestore.instance.collection('servico').add({
           'idoso': idosoId,
           'profissional': profissionalId,
+          'mensagem': observacao,
           'data': dataAtual,
         });
         print("Solicitação de contato registrada com sucesso.");

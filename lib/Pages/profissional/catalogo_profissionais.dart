@@ -7,9 +7,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'detalhesprofissional.dart';
 
-class CatalogoProfissionais extends StatelessWidget {
+class CatalogoProfissionais extends StatefulWidget {
   const CatalogoProfissionais({super.key});
 
+  @override
+  State<CatalogoProfissionais> createState() => _CatalogoProfissionaisState();
+}
+
+class _CatalogoProfissionaisState extends State<CatalogoProfissionais> {
+  TextEditingController observacaoController = TextEditingController(); 
   Future<List<Map<String, dynamic>>> fetchProfissionais() async {
     try {
       final QuerySnapshot result =
@@ -21,13 +27,12 @@ class CatalogoProfissionais extends StatelessWidget {
       return [];
     }
   }
-
+    
   @override
   Widget build(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser; 
     final String? email = user?.email; 
     final String? userid = user?.uid; 
-
     final usuario = DadosIdoso();
 
     return Scaffold(
@@ -183,9 +188,13 @@ class CatalogoProfissionais extends StatelessWidget {
                                 const SizedBox(width: 20),
                                 IconButton(
                                   onPressed: () async {
-                                    await usuario.solicitarContato(profissional['email'], userid);
+                                    bool? confirmou = await _mostrarAlerta(context);
+
+                                    if (confirmou == true){
+                                    await usuario.solicitarContato(profissional['email'], userid, observacaoController.text);
+                                    }
                                   },
-                                  icon: const Icon(Icons.mail, size: 40),
+                                  icon: const Icon(Icons.comment, size: 40),
                                 ),
                                 const SizedBox(width: 20),
                                 IconButton(
@@ -206,7 +215,43 @@ class CatalogoProfissionais extends StatelessWidget {
         },
       ),
     );
+
+    
   }
+
+Future<bool?> _mostrarAlerta(BuildContext context) async {
+  return await showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Insira sua Observação'),
+        content: TextField(
+          controller: observacaoController, // Controlador de texto
+          maxLines: 3,
+          decoration: const InputDecoration(
+            hintText: 'Digite sua observação aqui',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false); // Retorna "false" se cancelar
+            },
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(true); // Retorna "true" se salvar
+            },
+            child: const Text('Salvar'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   void _logout(BuildContext context) async {
     try {
