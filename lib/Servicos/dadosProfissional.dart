@@ -18,7 +18,8 @@ Future<List<Map<String, dynamic>>> fetchIdosos(String emailEntrada) async {
       for (var servicoDoc in servicoSnapshot.docs) {
         // Pegando o UID do idoso (que está no campo 'idoso') e a data dentro dos documentos da coleção 'servico'
         String uidIdoso = servicoDoc.get('idoso');
-        String dataServicoString = servicoDoc.get('data'); // Pega o campo 'data' (string)
+        String dataServicoString = servicoDoc.get('data');
+        String mensagem = servicoDoc.get('mensagem'); // Pega o campo 'data' (string)
 
         // Convertendo a string 'data' para o formato 'yyyy-MM-dd'
         DateTime dataServico = DateTime.parse(dataServicoString);
@@ -33,7 +34,8 @@ Future<List<Map<String, dynamic>>> fetchIdosos(String emailEntrada) async {
         // Adicionando os dados retornados da coleção 'user' junto com a 'data' da coleção 'servico'
         for (var userDoc in userSnapshot.docs) {
           Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
-          userData['data_servico'] = dataFormatada; // Adiciona o campo 'data' formatada
+          userData['data_servico'] = dataFormatada;
+          userData['mensagem'] =mensagem; // Adiciona o campo 'data' formatada
           userDataList.add(userData); // Adiciona à lista final
         }
       }

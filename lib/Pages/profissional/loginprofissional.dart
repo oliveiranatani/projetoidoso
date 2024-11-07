@@ -1,6 +1,7 @@
 import 'package:appidoso/Pages/idoso/catalogo_idoso.dart';
 import 'package:appidoso/Pages/profissional/cadastro_profissional.dart';
 import 'package:appidoso/Servicos/shared_preferences_service.dart';
+import 'package:appidoso/comum/meuSnackbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -29,8 +30,19 @@ class _LoginProfissionalState extends State<LoginProfissional> {
       );
 
       String uid = userCredential.user!.uid;
+      DocumentSnapshot teste = await FirebaseFirestore.instance.collection('user').doc(uid).get();
 
+      if(!teste.exists){
+
+      // Salva o ID do idoso nos SharedPreferences
       await SharedPreferencesService.saveIdProfissional(uid);
+
+      // Exibir mensagem de sucesso
+      mostrarSnackbar(
+        context: context,
+        texto: 'Login realizado com sucesso!',
+        isErro: false,
+      );
 
       // Navegar para a tela CatalogoIdosos após o login bem-sucedido
       Navigator.of(context).pushReplacement(
@@ -38,9 +50,21 @@ class _LoginProfissionalState extends State<LoginProfissional> {
           builder: (context) => const CatalogoIdosos(),
         ),
       );
+      } else 
+       {print("Erro no login: $teste");
+
+      // Exibir mensagem de erro
+      mostrarSnackbar(
+        context: context,
+        texto: 'Erro ao fazer login. Tente novamente. $teste',
+      );}
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro no login: $e')),
+      print("Erro no login: $e");
+
+      // Exibir mensagem de erro
+      mostrarSnackbar(
+        context: context,
+        texto: 'Erro ao fazer login. Tente novamente 1.',
       );
     }
   }

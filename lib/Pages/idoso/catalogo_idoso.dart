@@ -1,4 +1,3 @@
-import 'package:appidoso/Pages/idoso/perfilidoso.dart';
 import 'package:appidoso/Pages/profissional/loginprofissional.dart';
 import 'package:appidoso/Pages/profissional/perfilprofissional.dart';
 import 'package:appidoso/Servicos/dadosProfissional.dart';
@@ -10,52 +9,41 @@ class CatalogoIdosos extends StatelessWidget {
   const CatalogoIdosos({super.key});
 
 
-  Future<String?> fetchNomeUsuario(String uid) async {
+  Future<Map<String, dynamic>> fetchNomeUsuario(String uid) async {
     try {
       final DocumentSnapshot userDoc =
           await FirebaseFirestore.instance.collection('profissional').doc(uid).get();
       if (userDoc.exists) {
-        return userDoc.get('nome');
+        return userDoc.data() as Map<String, dynamic>;
       }
     } catch (e) {
       print("Erro ao buscar nome do usuário: $e");
     }
-    return null;
+    return {};
   }
 
   @override
   Widget build(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser; // Pega o usuário logado
-    final String? email = user?.email; // E-mail do usuário logado
+    final String? email = user?.email;
     final dadosprofissional = Dadosprofissional();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Catálogo de Idosos'),
         backgroundColor: const Color(0xFFBA68C8),
-        actions: [
-          Builder(
-            builder: (context) => IconButton(
-              icon: const CircleAvatar(
-                backgroundImage: AssetImage('assets/img/people.jpg'), //arrumar colocar a do editar perfil
-              ),
-              onPressed: () {
-                Scaffold.of(context).openDrawer(); // Abre o Drawer
-              },
-            ),
-          ),
-        ],
       ),
-      drawer: FutureBuilder<String?>(
+      drawer: FutureBuilder<Map<String, dynamic>>(
         future: fetchNomeUsuario(user?.uid ?? ''),
         builder: (context, snapshot) {
           String nomeUsuario = 'Nome não disponível';
+          String? fotoAvatar;
           if (snapshot.connectionState == ConnectionState.waiting) {
             nomeUsuario = 'Carregando...';
           } else if (snapshot.hasData) {
-            nomeUsuario = snapshot.data ?? 'Nome não disponível';
+            nomeUsuario =  snapshot.data?['nome'] ?? 'Nome não disponível';
+            fotoAvatar = snapshot.data?['imageUrl'];
           }
-
           return Drawer(
             child: ListView(
               padding: EdgeInsets.zero,
@@ -63,9 +51,14 @@ class CatalogoIdosos extends StatelessWidget {
                 UserAccountsDrawerHeader(
                   accountName: Text(nomeUsuario),
                   accountEmail: Text(email ?? 'E-mail não disponível'),
-                  currentAccountPicture: const CircleAvatar(
-                    backgroundImage: AssetImage('assets/img/people.jpg'), //arrumar colocar a do editar perfil
-                  ),
+                  currentAccountPicture:fotoAvatar  != null
+                      ? CircleAvatar(
+                          backgroundImage: NetworkImage(fotoAvatar),
+                          backgroundColor: Colors.transparent,
+                        )
+                      : const CircleAvatar(
+                          child: Icon(Icons.person),
+                        ),
                   decoration: const BoxDecoration(
                     color: Color(0xFFBA68C8),
                   ),
@@ -160,6 +153,14 @@ class CatalogoIdosos extends StatelessWidget {
                                 const SizedBox(height: 8),
                                 Text(
                                   idoso['email'] ?? 'Email não disponível',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  idoso['mensagem'] ?? 'Mensagem não disponível',
                                   style: const TextStyle(
                                     fontSize: 14,
                                     color: Colors.grey,

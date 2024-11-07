@@ -15,7 +15,7 @@ class LoginIdoso extends StatefulWidget {
 
 class _LoginIdosoState extends State<LoginIdoso> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -31,10 +31,13 @@ class _LoginIdosoState extends State<LoginIdoso> {
       );
 
       String uid = userCredential.user!.uid;
+      DocumentSnapshot teste = await FirebaseFirestore.instance.collection('profissional').doc(uid).get();
+
+      if(!teste.exists){
 
       // Salva o ID do idoso nos SharedPreferences
       await SharedPreferencesService.saveIdIdoso(uid);
-
+         
       // Exibir mensagem de sucesso
       mostrarSnackbar(
         context: context,
@@ -48,13 +51,21 @@ class _LoginIdosoState extends State<LoginIdoso> {
           builder: (context) => const CatalogoProfissionais(),
         ),
       );
+      }else
+        {print("Erro no login: $teste");
+
+      // Exibir mensagem de erro
+      mostrarSnackbar(
+        context: context,
+        texto: 'Erro ao fazer login. Tente novamente. $teste',
+      );}
     } catch (e) {
       print("Erro no login: $e");
 
       // Exibir mensagem de erro
       mostrarSnackbar(
         context: context,
-        texto: 'Erro ao fazer login. Tente novamente.',
+        texto: 'Erro ao fazer login. Tente novamente 1.',
       );
     }
   }

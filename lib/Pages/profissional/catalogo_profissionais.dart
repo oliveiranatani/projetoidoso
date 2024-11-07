@@ -1,6 +1,5 @@
 import 'package:appidoso/Pages/idoso/login_idoso.dart';
 import 'package:appidoso/Pages/idoso/perfilidoso.dart';
-import 'package:appidoso/Pages/profissional/perfilprofissional.dart';
 import 'package:appidoso/Servicos/dadosIdoso.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,7 +14,8 @@ class CatalogoProfissionais extends StatefulWidget {
 }
 
 class _CatalogoProfissionaisState extends State<CatalogoProfissionais> {
-  TextEditingController observacaoController = TextEditingController(); 
+  TextEditingController observacaoController = TextEditingController();
+
   Future<List<Map<String, dynamic>>> fetchProfissionais() async {
     try {
       final QuerySnapshot result =
@@ -27,39 +27,41 @@ class _CatalogoProfissionaisState extends State<CatalogoProfissionais> {
       return [];
     }
   }
-    
+
+  Future<Map<String, dynamic>> fetchUsuarioData(String userId) async {
+    try {
+      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('user')
+          .doc(userId)
+          .get();
+      return userDoc.data() as Map<String, dynamic>;
+    } catch (e) {
+      return {};
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final User? user = FirebaseAuth.instance.currentUser; 
-    final String? email = user?.email; 
-    final String? userid = user?.uid; 
-    final usuario = DadosIdoso();
+    final User? user = FirebaseAuth.instance.currentUser;
+    final String? email = user?.email;
+    final String? userId = user?.uid;
+    String? fotoAvatar;
+
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Catálogo de Profissionais'),
         backgroundColor: const Color(0xFFBA68C8),
-        actions: [
-          Builder(
-            builder: (context) => IconButton(
-              icon: const CircleAvatar(
-                backgroundImage: AssetImage('assets/img/people.jpg'),
-              ),
-              onPressed: () {
-                Scaffold.of(context).openDrawer(); // Abre o Drawer
-              },
-            ),
-          ),
-        ],
       ),
-      drawer: FutureBuilder<String?>(
-        future: usuario.fetchNomeUsuario(user?.uid ?? ''), // Busca o nome do usuário
+      drawer: FutureBuilder<Map<String, dynamic>>(
+        future: fetchUsuarioData(userId ?? ''),
         builder: (context, snapshot) {
           String nomeUsuario = 'Nome não disponível';
           if (snapshot.connectionState == ConnectionState.waiting) {
-            nomeUsuario = 'Carregando...'; // Exibe mensagem enquanto carrega
+            nomeUsuario = 'Carregando...';
           } else if (snapshot.hasData) {
-            nomeUsuario = snapshot.data ?? 'Nome não disponível'; // Nome obtido do Firestore
+            nomeUsuario = snapshot.data?['nome'] ?? 'Nome não disponível';
+            fotoAvatar = snapshot.data?['imageUrl'];
           }
 
           return Drawer(
@@ -69,9 +71,14 @@ class _CatalogoProfissionaisState extends State<CatalogoProfissionais> {
                 UserAccountsDrawerHeader(
                   accountName: Text(nomeUsuario),
                   accountEmail: Text(email ?? 'E-mail não disponível'),
-                  currentAccountPicture: const CircleAvatar(
-                    backgroundImage: AssetImage('assets/img/people.jpg'),
-                  ),
+                  currentAccountPicture: fotoAvatar  != null
+                      ? CircleAvatar(
+                          backgroundImage: NetworkImage(fotoAvatar as String),
+                          backgroundColor: Colors.transparent,
+                        )
+                      : const CircleAvatar(
+                          child: Icon(Icons.person),
+                        ),
                   decoration: const BoxDecoration(
                     color: Color(0xFFBA68C8),
                   ),
@@ -80,11 +87,11 @@ class _CatalogoProfissionaisState extends State<CatalogoProfissionais> {
                   leading: const Icon(Icons.person),
                   title: const Text('Meu Perfil'),
                   onTap: () {
-                    Navigator.pop(context); // Fecha o Drawer
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const MeuPerfil()), // Navega para a tela de Meu Perfil Profissional
+                          builder: (context) => const MeuPerfil()),
                     );
                   },
                 ),
@@ -100,7 +107,7 @@ class _CatalogoProfissionaisState extends State<CatalogoProfissionais> {
           );
         },
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
+      body: FutureBuilder<List<Map<String, dynamic>>>( 
         future: fetchProfissionais(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -188,17 +195,21 @@ class _CatalogoProfissionaisState extends State<CatalogoProfissionais> {
                                 const SizedBox(width: 20),
                                 IconButton(
                                   onPressed: () async {
-                                    bool? confirmou = await _mostrarAlerta(context);
+                                    bool? confirmou =
+                                        await _mostrarAlerta(context);
 
-                                    if (confirmou == true){
-                                    await usuario.solicitarContato(profissional['email'], userid, observacaoController.text);
+                                    if (confirmou == true) {
+                                      await DadosIdoso().solicitarContato(
+                                          profissional['email'],
+                                          userId,
+                                          observacaoController.text);
                                     }
                                   },
                                   icon: const Icon(Icons.comment, size: 40),
                                 ),
                                 const SizedBox(width: 20),
                                 IconButton(
-                                  onPressed: () {}, // Adicionar funcionalidade para WhatsApp
+                                  onPressed: () {},
                                   icon: const Icon(Icons.phone, size: 40),
                                 ),
                               ],
@@ -215,48 +226,44 @@ class _CatalogoProfissionaisState extends State<CatalogoProfissionais> {
         },
       ),
     );
-
-    
   }
 
-Future<bool?> _mostrarAlerta(BuildContext context) async {
-  return await showDialog<bool>(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Insira sua Observação'),
-        content: TextField(
-          controller: observacaoController, // Controlador de texto
-          maxLines: 3,
-          decoration: const InputDecoration(
-            hintText: 'Digite sua observação aqui',
-            border: OutlineInputBorder(),
+  Future<bool?> _mostrarAlerta(BuildContext context) async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Insira sua mensagem ao profissional'),
+          content: TextField(
+            controller: observacaoController,
+            maxLines: 3,
+            decoration: const InputDecoration(
+              hintText: 'Digite sua mensagem aqui',
+              border: OutlineInputBorder(),
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false); // Retorna "false" se cancelar
-            },
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(true); // Retorna "true" se salvar
-            },
-            child: const Text('Salvar'),
-          ),
-        ],
-      );
-    },
-  );
-}
-
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text('Salvar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   void _logout(BuildContext context) async {
     try {
       await FirebaseAuth.instance.signOut();
-      // Navegar de volta para a tela de login
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const LoginIdoso()),
       );
