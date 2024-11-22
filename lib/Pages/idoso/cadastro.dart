@@ -23,31 +23,38 @@ class _CadastroPageState extends State<CadastroPage> {
   bool _obscureText = true; // Variável para controlar a visibilidade da senha
 
   void _register() async {
-    final cadastrar = AutenticacaoServico();
-    try {
-      await cadastrar.cadastrarUsuario(
-        nome: nameController.text, 
-        email: emailController.text, 
-        senha: passwordController.text, 
-        confSenha: confirmPasswordController.text, 
-        cpf: cpfController.text, 
-        dtNas: birthdateController.text
-      );
+  final cadastrar = AutenticacaoServico();
+  try {
+    await cadastrar.cadastrarUsuario(
+      nome: nameController.text, 
+      email: emailController.text, 
+      senha: passwordController.text, 
+      confSenha: confirmPasswordController.text, 
+      cpf: cpfController.text, 
+      dtNas: birthdateController.text
+    );
 
-      // Exibir mensagem de sucesso
-      mostrarSnackbar(
-        context: context, 
-        texto: 'Usuário cadastrado com sucesso!', 
-        isErro: false
-      );
-    } catch (e) {
-      // Exibir mensagem de erro
-      mostrarSnackbar(
-        context: context, 
-        texto: 'Falha ao cadastrar usuário. Tente novamente.'
-      );
-    }
+    // Exibir mensagem de sucesso
+    mostrarSnackbar(
+      context: context, 
+      texto: 'Usuário cadastrado com sucesso!', 
+      isErro: false
+    );
+
+    // Redirecionar para a página de login
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginIdoso()),
+    );
+  } catch (e) {
+    // Exibir mensagem de erro
+    mostrarSnackbar(
+      context: context, 
+      texto: 'Falha ao cadastrar usuário. Tente novamente.'
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

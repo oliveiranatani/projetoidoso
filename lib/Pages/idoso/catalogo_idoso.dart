@@ -5,27 +5,49 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class CatalogoIdosos extends StatelessWidget {
+class CatalogoIdosos extends StatefulWidget {
   const CatalogoIdosos({super.key});
 
 
-  Future<Map<String, dynamic>> fetchNomeUsuario(String uid) async {
-    try {
-      final DocumentSnapshot userDoc =
-          await FirebaseFirestore.instance.collection('profissional').doc(uid).get();
-      if (userDoc.exists) {
-        return userDoc.data() as Map<String, dynamic>;
+  @override
+  _CatalogoIdososState createState() => _CatalogoIdososState();
+}
+
+class _CatalogoIdososState extends State<CatalogoIdosos> {
+
+  @override
+  void initState() {
+    fetchNomeUsuario();
+    super.initState();
+    
+  }
+
+  String nomeUsuario = 'Carregando...';
+  String? emailUsuario = 'Carregando...';
+  String? fotoAvatar;
+
+  // Função para carregar os dados do usuário sempre que o Drawer for aberto
+  void fetchNomeUsuario() async {
+    final User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final DocumentSnapshot userDoc =
+            await FirebaseFirestore.instance.collection('profissional').doc(user.uid).get();
+        if (userDoc.exists) {
+          setState(() {
+            nomeUsuario = userDoc['nome'] ?? 'Nome não disponível';
+            fotoAvatar = userDoc['imageUrl'];
+            emailUsuario = user.email ?? 'E-mail não disponível';
+          });
+        }
+      } catch (e) {
+        print("usuário saiu!");
       }
-    } catch (e) {
-      print("Erro ao buscar nome do usuário: $e");
     }
-    return {};
   }
 
   @override
   Widget build(BuildContext context) {
-    final User? user = FirebaseAuth.instance.currentUser; // Pega o usuário logado
-    final String? email = user?.email;
     final dadosprofissional = Dadosprofissional();
 
     return Scaffold(
@@ -33,27 +55,21 @@ class CatalogoIdosos extends StatelessWidget {
         title: const Text('Catálogo de Idosos'),
         backgroundColor: const Color(0xFFBA68C8),
       ),
-      drawer: FutureBuilder<Map<String, dynamic>>(
-        future: fetchNomeUsuario(user?.uid ?? ''),
-        builder: (context, snapshot) {
-          String nomeUsuario = 'Nome não disponível';
-          String? fotoAvatar;
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            nomeUsuario = 'Carregando...';
-          } else if (snapshot.hasData) {
-            nomeUsuario =  snapshot.data?['nome'] ?? 'Nome não disponível';
-            fotoAvatar = snapshot.data?['imageUrl'];
-          }
+      drawer: Builder(
+        builder: (context) {
+          // Chama o método fetchNomeUsuario toda vez que o Drawer for aberto
+          fetchNomeUsuario();
+
           return Drawer(
             child: ListView(
               padding: EdgeInsets.zero,
               children: <Widget>[
                 UserAccountsDrawerHeader(
                   accountName: Text(nomeUsuario),
-                  accountEmail: Text(email ?? 'E-mail não disponível'),
-                  currentAccountPicture:fotoAvatar  != null
+                  accountEmail: Text(emailUsuario ?? ''),
+                  currentAccountPicture: fotoAvatar != null
                       ? CircleAvatar(
-                          backgroundImage: NetworkImage(fotoAvatar),
+                          backgroundImage: NetworkImage(fotoAvatar!),
                           backgroundColor: Colors.transparent,
                         )
                       : const CircleAvatar(
@@ -70,7 +86,7 @@ class CatalogoIdosos extends StatelessWidget {
                     Navigator.pop(context); // Fecha o Drawer
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const MeuPerfilProfissional()), // Navega para a tela de Meu Perfil
+                      MaterialPageRoute(builder: (context) => const MeuPerfilProfissional()),
                     );
                   },
                 ),
@@ -92,12 +108,15 @@ class CatalogoIdosos extends StatelessWidget {
           );
         },
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(  // Carrega os idosos
-        future: dadosprofissional.fetchIdosos(email as String),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: dadosprofissional.fetchIdosos(emailUsuario as String),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Erro ao carregar idosos: ${snapshot.error}')),
+            );
             return const Center(child: Text('Erro ao carregar idosos'));
           } else if (snapshot.hasData && snapshot.data!.isEmpty) {
             return const Center(child: Text('Nenhum idoso cadastrado.'));
@@ -145,14 +164,14 @@ class CatalogoIdosos extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  idoso['data_servico'] ?? 'CPF não disponível',
+                                  idoso['data_servico'] ?? 'Data não disponível',
                                   style: const TextStyle(
                                     fontSize: 16,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  idoso['email'] ?? 'Email não disponível',
+                                  idoso['email'] ?? 'E-mail não disponível',
                                   style: const TextStyle(
                                     fontSize: 14,
                                     color: Colors.grey,

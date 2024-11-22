@@ -1,9 +1,10 @@
 import 'package:appidoso/Pages/idoso/login_idoso.dart';
 import 'package:appidoso/Pages/idoso/perfilidoso.dart';
 import 'package:appidoso/Servicos/dadosIdoso.dart';
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'detalhesprofissional.dart';
 
 class CatalogoProfissionais extends StatefulWidget {
@@ -15,6 +16,7 @@ class CatalogoProfissionais extends StatefulWidget {
 
 class _CatalogoProfissionaisState extends State<CatalogoProfissionais> {
   TextEditingController observacaoController = TextEditingController();
+  Map<String, dynamic>? usuarioData;
 
   Future<List<Map<String, dynamic>>> fetchProfissionais() async {
     try {
@@ -28,15 +30,19 @@ class _CatalogoProfissionaisState extends State<CatalogoProfissionais> {
     }
   }
 
-  Future<Map<String, dynamic>> fetchUsuarioData(String userId) async {
+  Future<void> fetchUsuarioData(String userId) async {
     try {
       final DocumentSnapshot userDoc = await FirebaseFirestore.instance
           .collection('user')
           .doc(userId)
           .get();
-      return userDoc.data() as Map<String, dynamic>;
+      setState(() {
+        usuarioData = userDoc.data() as Map<String, dynamic>?;
+      });
     } catch (e) {
-      return {};
+      setState(() {
+        usuarioData = {};
+      });
     }
   }
 
@@ -45,69 +51,63 @@ class _CatalogoProfissionaisState extends State<CatalogoProfissionais> {
     final User? user = FirebaseAuth.instance.currentUser;
     final String? email = user?.email;
     final String? userId = user?.uid;
-    String? fotoAvatar;
-
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Catálogo de Profissionais'),
         backgroundColor: const Color(0xFFBA68C8),
       ),
-      drawer: FutureBuilder<Map<String, dynamic>>(
-        future: fetchUsuarioData(userId ?? ''),
-        builder: (context, snapshot) {
-          String nomeUsuario = 'Nome não disponível';
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            nomeUsuario = 'Carregando...';
-          } else if (snapshot.hasData) {
-            nomeUsuario = snapshot.data?['nome'] ?? 'Nome não disponível';
-            fotoAvatar = snapshot.data?['imageUrl'];
-          }
-
-          return Drawer(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: <Widget>[
-                UserAccountsDrawerHeader(
-                  accountName: Text(nomeUsuario),
-                  accountEmail: Text(email ?? 'E-mail não disponível'),
-                  currentAccountPicture: fotoAvatar  != null
-                      ? CircleAvatar(
-                          backgroundImage: NetworkImage(fotoAvatar as String),
-                          backgroundColor: Colors.transparent,
-                        )
-                      : const CircleAvatar(
-                          child: Icon(Icons.person),
-                        ),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFBA68C8),
+      onDrawerChanged: (isOpened) {
+        if (isOpened && userId != null) {
+          fetchUsuarioData(userId);
+        }
+      },
+      drawer: Drawer(
+        child: usuarioData == null
+            ? const Center(child: CircularProgressIndicator())
+            : ListView(
+                padding: EdgeInsets.zero,
+                children: <Widget>[
+                  UserAccountsDrawerHeader(
+                    accountName: Text(usuarioData?['nome'] ?? 'Nome não disponível'),
+                    accountEmail: Text(email ?? 'E-mail não disponível'),
+                    currentAccountPicture: usuarioData?['imageUrl'] != null
+                        ? CircleAvatar(
+                            backgroundImage:
+                                NetworkImage(usuarioData!['imageUrl']),
+                            backgroundColor: Colors.transparent,
+                          )
+                        : const CircleAvatar(
+                            child: Icon(Icons.person),
+                          ),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFBA68C8),
+                    ),
                   ),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.person),
-                  title: const Text('Meu Perfil'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const MeuPerfil()),
-                    );
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.exit_to_app),
-                  title: const Text('Logoff'),
-                  onTap: () {
-                    _logout(context);
-                  },
-                ),
-              ],
-            ),
-          );
-        },
+                  ListTile(
+                    leading: const Icon(Icons.person),
+                    title: const Text('Meu Perfil'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MeuPerfil(),
+                        ),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.exit_to_app),
+                    title: const Text('Logoff'),
+                    onTap: () {
+                      _logout(context);
+                    },
+                  ),
+                ],
+              ),
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>( 
+      body: FutureBuilder<List<Map<String, dynamic>>>(
         future: fetchProfissionais(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -168,7 +168,8 @@ class _CatalogoProfissionaisState extends State<CatalogoProfissionais> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        profissional['nome'] ?? 'Nome não disponível',
+                                        profissional['nome'] ??
+                                            'Nome não disponível',
                                         style: const TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
@@ -176,14 +177,24 @@ class _CatalogoProfissionaisState extends State<CatalogoProfissionais> {
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
-                                        profissional['profissao1'] ?? 'Profissão não disponível',
+                                        profissional['profissao1'] ??
+                                            'Profissão não disponível',
                                         style: const TextStyle(
                                           fontSize: 16,
                                         ),
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
-                                        profissional['email'] ?? 'Email não disponível',
+                                        profissional['email'] ??
+                                            'Email não disponível',
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                       Text(
+                                        profissional['telefone'] ??
+                                            'Telefone não disponível',
                                         style: const TextStyle(
                                           fontSize: 14,
                                           color: Colors.grey,
@@ -209,7 +220,26 @@ class _CatalogoProfissionaisState extends State<CatalogoProfissionais> {
                                 ),
                                 const SizedBox(width: 20),
                                 IconButton(
-                                  onPressed: () {},
+                                  onPressed: () async{
+
+                                  final telefone = profissional['telefone'] ?? '';
+                                    final url = Uri.parse(
+                                        'https://wa.me/$telefone'); 
+
+                                    
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(
+                                          url); 
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                'Não foi possível abrir o WhatsApp')),
+                                      );
+                                    }
+
+                                  },
                                   icon: const Icon(Icons.phone, size: 40),
                                 ),
                               ],

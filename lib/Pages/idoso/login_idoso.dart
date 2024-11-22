@@ -1,10 +1,8 @@
+import 'package:appidoso/Pages/Provider/provider_login.dart';
 import 'package:appidoso/Pages/idoso/cadastro.dart';
-import 'package:appidoso/Pages/profissional/catalogo_profissionais.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:appidoso/comum/meuSnackbar.dart'; // Importando a função mostrarSnackbar
-import 'package:appidoso/Servicos/shared_preferences_service.dart'; // Importando o SharedPreferencesService
+import 'package:provider/provider.dart';
+
 
 class LoginIdoso extends StatefulWidget {
   const LoginIdoso({super.key});
@@ -14,68 +12,17 @@ class LoginIdoso extends StatefulWidget {
 }
 
 class _LoginIdosoState extends State<LoginIdoso> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool _obscureText = true; 
+
   
-  // Adicionando a variável _obscureText
-  bool _obscureText = true; // Inicializa como true para ocultar a senha
-
-  Future<void> _login() async {
-    try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
-      );
-
-      String uid = userCredential.user!.uid;
-      DocumentSnapshot teste = await FirebaseFirestore.instance.collection('profissional').doc(uid).get();
-
-      if(!teste.exists){
-
-      // Salva o ID do idoso nos SharedPreferences
-      await SharedPreferencesService.saveIdIdoso(uid);
-         
-      // Exibir mensagem de sucesso
-      mostrarSnackbar(
-        context: context,
-        texto: 'Login realizado com sucesso!',
-        isErro: false,
-      );
-
-      // Navegar para a tela CatalogoProfissionais após o login bem-sucedido
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const CatalogoProfissionais(),
-        ),
-      );
-      }else
-        {print("Erro no login: $teste");
-
-      // Exibir mensagem de erro
-      mostrarSnackbar(
-        context: context,
-        texto: 'Erro ao fazer login. Tente novamente. $teste',
-      );}
-    } catch (e) {
-      print("Erro no login: $e");
-
-      // Exibir mensagem de erro
-      mostrarSnackbar(
-        context: context,
-        texto: 'Erro ao fazer login. Tente novamente 1.',
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFFBA68C8),
-        title: const Text('Login Idoso'),
+        title: const Text('Login'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -118,8 +65,20 @@ class _LoginIdosoState extends State<LoginIdoso> {
               ),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _login,
+
+            Consumer<IdosoProvider>(builder: (context, provider, _) 
+            {
+                return  ElevatedButton(
+              onPressed: () async {
+                await provider.login(context, emailController.text, passwordController.text);
+                if (provider.tipoUsuario == "user") {
+                  // ignore: use_build_context_synchronously
+                  Navigator.of(context).pushNamed('/dashboard');
+                } else {
+                  // ignore: use_build_context_synchronously
+                  Navigator.of(context).pushNamed('/dashboardprofi');
+                }
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF892CDB),
               ),
@@ -127,8 +86,11 @@ class _LoginIdosoState extends State<LoginIdoso> {
                 'Entrar',
                 style: TextStyle(color: Colors.white),
               ),
-            ),
-            const SizedBox(height: 20),
+            );
+            }
+            ,),
+           
+           const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

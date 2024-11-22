@@ -44,13 +44,7 @@ class _MeuPerfilState extends State<MeuPerfil> {
     }
   }
 
-  Future<void> deleteImage(String imageUrl) async {
-    try {
-      await storage.refFromURL(imageUrl).delete();
-    } on FirebaseException catch (e) {
-      throw Exception('Erro ao excluir a imagem: ${e.code}');
-    }
-  }
+  
 
   Future<Map<String, dynamic>?> fetchUserProfile(String uid) async {
     try {
@@ -68,17 +62,13 @@ class _MeuPerfilState extends State<MeuPerfil> {
     try {
     User? currentUser = FirebaseAuth.instance.currentUser;
 
-      
       await FirebaseFirestore.instance.collection('user').doc(uid).update({
         'nome': nome,
         'imageUrl': _imageUrl,
       });
     
-    //inserindo no authentication
     await currentUser?.updatePhotoURL(_imageUrl);
     await currentUser?.reload();
-
-     
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Perfil atualizado com sucesso!')),
       );
@@ -130,17 +120,7 @@ class _MeuPerfilState extends State<MeuPerfil> {
     );
   }
 
-  Future<void> handleDeleteImage() async {
-    if (_imageUrl != null) {
-      await deleteImage(_imageUrl!);
-      setState(() {
-        _imageUrl = null; // Remove a URL da imagem após a exclusão
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Foto de perfil excluída com sucesso!')),
-      );
-    }
-  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -209,13 +189,7 @@ class _MeuPerfilState extends State<MeuPerfil> {
                         ),
                         child: const Text('Mudar Foto de Perfil', style: TextStyle(color: Colors.white)),
                       ),
-                      ElevatedButton(
-                        onPressed: handleDeleteImage,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red.shade400,
-                        ),
-                        child: const Text('Excluir Foto de Perfil', style: TextStyle(color: Colors.white)),
-                      ),
+                      
                     ],
                   ),
                   const SizedBox(height: 40),
@@ -255,9 +229,9 @@ class _MeuPerfilState extends State<MeuPerfil> {
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (user != null) {
-                        updateUserProfile(context, user.uid, nomeController.text);
+                        await updateUserProfile(context, user.uid, nomeController.text);
                       }
                     },
                     style: ElevatedButton.styleFrom(

@@ -196,13 +196,6 @@ class _MeuPerfilProfissionalState extends State<MeuPerfilProfissional> {
                         ),
                         child: const Text('Mudar Foto de Perfil', style: TextStyle(color: Colors.white),),
                       ),
-                      ElevatedButton(
-                        onPressed: handleDeleteImage,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red.shade400,
-                        ),
-                        child: const Text('Excluir Foto de Perfil', style: TextStyle(color: Colors.white),),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -258,9 +251,9 @@ class _MeuPerfilProfissionalState extends State<MeuPerfilProfissional> {
                   
                   Center(
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (profissional != null) {
-                          updateProfissionalProfile(
+                          await updateProfissionalProfile(
                             context,
                             profissional.uid,
                             nomeController.text,
